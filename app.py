@@ -30,7 +30,7 @@ def gestionar_tareas():
         cursor.execute("SELECT * FROM tareas;")
         filas = cursor.fetchall()
         
-        print("\n📋 Lista de tareas en la DB:")
+        print("\n📋 Lista de tareas en la DB.:")
         for fila in filas:
             print(f" - [{fila[0]}] {fila[1]} (Completada: {fila[2]})")
 
