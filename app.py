@@ -1,44 +1,35 @@
+from flask import Flask, render_template, request, redirect, url_for
 import psycopg2
 
-def gestionar_tareas():
-    try:
-        # 1. Conexión
-        conexion = psycopg2.connect(
-            user="postgres", password="mi_password",
-            host="127.0.0.1", port="5432", database="postgres"
-        )
-        cursor = conexion.cursor()
+app = Flask(__name__)
 
-        # 2. Crear tabla si no existe
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS tareas (
-                id SERIAL PRIMARY KEY,
-                descripcion TEXT NOT NULL,
-                completada BOOLEAN DEFAULT FALSE
-            );
-        """)
-        
-        # 3. Insertar una tarea de prueba
-        nueva_tarea = "Aprender Docker y PostgreSQL en WSL"
-        cursor.execute("INSERT INTO tareas (descripcion) VALUES (%s)", (nueva_tarea,))
-        
-        # 4. Confirmar los cambios (IMPORTANTE en SQL)
-        conexion.commit()
-        print(f"✅ Tarea guardada: '{nueva_tarea}'")
+def obtener_conexion():
+    return psycopg2.connect(
+        user="postgres", password="12345", 
+        host="127.0.0.1", port="5432", database="proyectos_db"
+    )
 
-        # 5. Consultar los datos para verificar
-        cursor.execute("SELECT * FROM tareas;")
-        filas = cursor.fetchall()
-        
-        print("\n📋 Lista de tareas en la DB.:")
-        for fila in filas:
-            print(f" - [{fila[0]}] {fila[1]} (Completada: {fila[2]})")
+@app.route('/')
+def index():
+    conn = obtener_conexion()
+    cursor = conn.cursor()
+    cursor.execute("SELECT titulo, fecha_creacion FROM tareas ORDER BY fecha_creacion DESC;")
+    lista = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return render_template('index.html', tareas=lista)
 
+@app.route('/agregar', methods=['POST'])
+def agregar():
+    titulo_tarea = request.form.get('titulo')
+    if titulo_tarea:
+        conn = obtener_conexion()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO tareas (titulo) VALUES (%s);", (titulo_tarea,))
+        conn.commit()
         cursor.close()
-        conexion.close()
+        conn.close()
+    return redirect('/')
 
-    except Exception as error:
-        print(f"❌ Error: {error}")
-
-if __name__ == "__main__":
-    gestionar_tareas()
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)

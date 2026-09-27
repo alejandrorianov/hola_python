@@ -1,0 +1,23 @@
+<body>
+    <h1>📋 Mi Gestor de Tareas</h1>
+
+    <form action="/agregar" method="POST" style="margin-bottom: 30px;">
+        <input type="text" name="titulo" placeholder="Escribe una nueva tarea..." required
+            style="padding: 10px; width: 300px; border-radius: 5px; border: 1px solid #ccc;">
+        <button type="submit"
+            style="padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            Guardar Tarea
+        </button>
+    </form>
+
+    <hr style="width: 50%; border: 0.5px solid #ccc;">
+
+    <ul>
+        {% for tarea in tareas %}
+        <li>
+            <strong>{{ tarea[0] }}</strong> <br>
+            <span class="fecha">{{ tarea[1].strftime('%Y-%m-%d %H:%M') }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
